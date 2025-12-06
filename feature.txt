@@ -1,0 +1,9 @@
+Make cursor bubbles follow carets exactly using coordsAtPos.
+
+Add per-room permissions (only room owner can toggle AI / export / etc).
+
+Add rate limiter UI feedback if socket events are being throttled.
+
+
+add this features 
+

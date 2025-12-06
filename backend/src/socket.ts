@@ -1,117 +1,202 @@
 // src/socket.ts
-import type { Server as HTTPServer } from "http";
+import http from "http";
 import { Server } from "socket.io";
-import type { RedisAdapter } from "@socket.io/redis-adapter";
+import { createRedisClients } from "./redis";
+import { createAdapter } from "@socket.io/redis-adapter";
 
-type EditorUpdatePayload = {
-  roomId: string;
-  content: string;
-};
-
-type CursorUpdatePayload = {
-  roomId: string;
-  userId: string;
+type PresenceUser = {
+  id: string;
   name: string;
-  cursor: { from: number; to: number };
+  color: string;
+  isTyping: boolean;
+  isOwner?: boolean;
 };
 
-type JoinRoomPayload = {
-  roomId: string;
-  userId: string;
-  name: string;
+type CursorSelection = {
+  from: number;
+  to: number;
 };
 
-export function createSocketServer(
-  server: HTTPServer,
-  opts?: { adapter?: any }
-) {
+const roomUsers = new Map<string, Map<string, PresenceUser>>();
+const roomDocs = new Map<string, string>();
+const roomOwners = new Map<string, string>(); // roomId -> ownerUserId
 
-  const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
+const RATE_WINDOW_MS = 1000;
+const MAX_EVENTS_PER_WINDOW = 10;
 
+type RateState = {
+  timestamps: number[];
+};
+
+export function setupSocket(server: http.Server, origin: string) {
   const io = new Server(server, {
     cors: {
-      origin: FRONTEND_ORIGIN,
+      origin,
       credentials: true,
     },
   });
 
-  if (opts?.adapter) {
-    io.adapter(opts.adapter);
+  const { pubClient, subClient } = createRedisClients();
+  if (pubClient && subClient) {
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log("[socket] Using Redis adapter");
+  } else {
+    console.log("[socket] Running without Redis adapter");
   }
 
   io.on("connection", (socket) => {
-    console.log("[socket] client connected", socket.id);
+    console.log("[socket] connected", socket.id);
 
-    socket.on("join-room", (data: JoinRoomPayload) => {
-      const { roomId, userId, name } = data || {};
+    const rateState: RateState = { timestamps: [] };
 
-      if (!roomId || typeof roomId !== "string") return;
-      socket.join(roomId);
+    const checkRateLimit = (action: string): boolean => {
+      const now = Date.now();
+      rateState.timestamps = rateState.timestamps.filter(
+        (t) => now - t < RATE_WINDOW_MS
+      );
+      if (rateState.timestamps.length >= MAX_EVENTS_PER_WINDOW) {
+        const retryAfterMs =
+          RATE_WINDOW_MS - (now - rateState.timestamps[0]);
+        socket.emit("rate-limit", { action, retryAfterMs });
+        return false;
+      }
+      rateState.timestamps.push(now);
+      return true;
+    };
 
-      socket.data.userId = userId;
-      socket.data.name = name;
-      socket.data.roomId = roomId;
+    socket.on(
+      "join-room",
+      (payload: {
+        roomId: string;
+        user: {
+          id: string;
+          name: string;
+          color: string;
+          isOwner?: boolean;
+        };
+      }) => {
+        const { roomId, user } = payload;
 
-      io.to(roomId).emit("presence-update", {
-        type: "join",
-        userId,
-        name,
-        socketId: socket.id,
-      });
+        (socket.data as any).roomId = roomId;
+        (socket.data as any).userId = user.id;
 
-      console.log(`[socket] ${socket.id} joined room ${roomId}`);
-    });
+        socket.join(roomId);
 
-    socket.on("leave-room", (roomId: string) => {
-      if (!roomId) return;
+        // simple owner logic:
+        // - if room has no owner yet, first user becomes owner
+        // - OR you can trust payload.user.isOwner coming from your DB
+        if (!roomOwners.has(roomId)) {
+          roomOwners.set(roomId, user.id);
+        }
+        const ownerId = roomOwners.get(roomId);
+
+        let users = roomUsers.get(roomId);
+        if (!users) {
+          users = new Map();
+          roomUsers.set(roomId, users);
+        }
+
+        users.set(socket.id, {
+          id: user.id,
+          name: user.name,
+          color: user.color,
+          isTyping: false,
+          isOwner: ownerId === user.id,
+        });
+
+        io.to(roomId).emit("presence-state", {
+          users: Array.from(users.values()),
+          ownerId,
+        });
+
+        if (roomDocs.has(roomId)) {
+          socket.emit("editor-init", { html: roomDocs.get(roomId) });
+        }
+      }
+    );
+
+    socket.on(
+      "editor-update",
+      (payload: { roomId: string; html: string; userId: string }) => {
+        if (!checkRateLimit("editor-update")) return;
+
+        const { roomId, html, userId } = payload;
+        roomDocs.set(roomId, html);
+
+        socket.to(roomId).emit("editor-update", {
+          html,
+          userId,
+        });
+      }
+    );
+
+    socket.on(
+      "cursor-update",
+      (payload: {
+        roomId: string;
+        userId: string;
+        name: string;
+        color: string;
+        selection: CursorSelection | null;
+        isTyping: boolean;
+      }) => {
+        if (!checkRateLimit("cursor-update")) return;
+
+        const { roomId, userId, name, color, isTyping, selection } = payload;
+
+        const users = roomUsers.get(roomId);
+        if (users) {
+          for (const [sockId, u] of users.entries()) {
+            if (u.id === userId) {
+              users.set(sockId, {
+                ...u,
+                isTyping,
+              });
+            }
+          }
+          io.to(roomId).emit("presence-state", {
+            users: Array.from(users.values()),
+            ownerId: roomOwners.get(roomId),
+          });
+        }
+
+        socket.to(roomId).emit("cursor-update", {
+          userId,
+          name,
+          color,
+          isTyping,
+          selection,
+        });
+      }
+    );
+
+    socket.on("leave-room", ({ roomId }: { roomId: string }) => {
       socket.leave(roomId);
 
-      io.to(roomId).emit("presence-update", {
-        type: "leave",
-        userId: socket.data.userId,
-        name: socket.data.name,
-        socketId: socket.id,
-      });
-
-      console.log(`[socket] ${socket.id} left room ${roomId}`);
-    });
-
-    socket.on("editor-update", (payload: EditorUpdatePayload) => {
-      if (!payload?.roomId || typeof payload.content !== "string") return;
-
-      // Basic protection: ignore crazy huge payloads
-      if (payload.content.length > 200_000) return;
-
-      // Broadcast to everyone else in the room
-      socket.to(payload.roomId).emit("editor-update", {
-        content: payload.content,
-        userId: socket.data.userId,
-      });
-    });
-
-    socket.on("cursor-update", (payload: CursorUpdatePayload) => {
-      if (!payload?.roomId) return;
-
-      socket.to(payload.roomId).emit("cursor-update", {
-        userId: payload.userId,
-        name: payload.name,
-        cursor: payload.cursor,
-      });
+      const users = roomUsers.get(roomId);
+      if (users) {
+        users.delete(socket.id);
+        io.to(roomId).emit("presence-state", {
+          users: Array.from(users.values()),
+          ownerId: roomOwners.get(roomId),
+        });
+      }
     });
 
     socket.on("disconnect", () => {
-      const roomId = socket.data.roomId as string | undefined;
+      const roomId = (socket.data as any).roomId as string | undefined;
 
       if (roomId) {
-        io.to(roomId).emit("presence-update", {
-          type: "leave",
-          userId: socket.data.userId,
-          name: socket.data.name,
-          socketId: socket.id,
-        });
+        const users = roomUsers.get(roomId);
+        if (users) {
+          users.delete(socket.id);
+          io.to(roomId).emit("presence-state", {
+            users: Array.from(users.values()),
+            ownerId: roomOwners.get(roomId),
+          });
+        }
       }
-
-      console.log("[socket] client disconnected", socket.id);
+      console.log("[socket] disconnected", socket.id);
     });
   });
 

@@ -6,24 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { createRoom } from "@/app/actions/createRoom";
 
 export default function RoomManager() {
   const router = useRouter();
+  const { user } = useUser();
+
   const [createName, setCreateName] = useState("");
   const [joinValue, setJoinValue] = useState("");
 
-  const makeId = (name: string) => {
-    const base = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const suffix = Math.random().toString(36).slice(2, 6);
-    return (base || "room") + "-" + suffix;
-  };
+  const handleCreate = async () => {
+    if (!user) return;
 
-  const handleCreate = () => {
-    const id = makeId(createName);
+    const id = await createRoom(createName || "room", user.id);
     router.push(`/dashboard/room/${id}`);
   };
 
@@ -45,15 +41,31 @@ export default function RoomManager() {
 
         <CardContent className="space-y-5">
           <div>
-            <Input placeholder="Room name…" value={createName} onChange={(e)=>setCreateName(e.target.value)} />
-            <Button className="mt-2 w-full" onClick={handleCreate}>Create</Button>
+            <Input
+              placeholder="Room name…"
+              value={createName}
+              onChange={(e) => setCreateName(e.target.value)}
+            />
+            <Button onClick={handleCreate} className="mt-2 w-full">
+              Create
+            </Button>
           </div>
 
-          <Separator/>
+          <Separator />
 
           <div>
-            <Input placeholder="Room link / id…" value={joinValue} onChange={(e)=>setJoinValue(e.target.value)} />
-            <Button variant="outline" className="mt-2 w-full" onClick={handleJoin}>Join</Button>
+            <Input
+              placeholder="Room link / id…"
+              value={joinValue}
+              onChange={(e) => setJoinValue(e.target.value)}
+            />
+            <Button
+              variant="outline"
+              onClick={handleJoin}
+              className="mt-2 w-full"
+            >
+              Join
+            </Button>
           </div>
         </CardContent>
       </Card>

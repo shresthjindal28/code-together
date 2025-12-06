@@ -2,9 +2,6 @@
 
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-// TABLE: room_documents
-// columns: room_id (text, PK), content (text), updated_at (timestamptz)
-
 export async function loadDocument(roomId: string): Promise<string> {
   const supabase = createSupabaseServerClient();
 
@@ -15,7 +12,7 @@ export async function loadDocument(roomId: string): Promise<string> {
     .maybeSingle();
 
   if (error) {
-    console.error("loadDocument error", error);
+    console.error("loadDocument error:", error.message, error);
     return "";
   }
 
@@ -32,6 +29,23 @@ export async function saveDocument(roomId: string, html: string) {
   });
 
   if (error) {
-    console.error("saveDocument error", error);
+    console.error("saveDocument error:", error.message, error);
   }
+}
+
+export async function getRoomById(roomId: string) {
+  const supabase = createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("*")
+    .eq("id", roomId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getRoomById error:", error.message, error);
+    return null;
+  }
+
+  return data;
 }
