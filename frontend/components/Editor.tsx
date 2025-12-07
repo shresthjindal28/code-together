@@ -189,56 +189,57 @@ export default function Editor({ initialHtml, roomId, isOwner }: Props) {
   if (!editor) return null;
 
   return (
-  <div
-    className="w-[77vw] min-h-screen py-6 px-6 bg-gradient-to-br from-[#020316] via-[#05030f] to-[#020204] rounded-3xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.45)]"
-  >
-    <PresenceBar users={remoteUsers} />
-
-    <div className="flex flex-col gap-4">
-      <div className="rounded-2xl p-3 bg-[#0b0d25]/40 backdrop-blur-xl border border-white/10">
-        <EditorToolbar editor={editor} />
+    <div
+      className="w-full max-w-[1400px] mx-auto min-h-screen py-4 sm:py-6 px-3 sm:px-6 bg-gradient-to-br from-[#020316] via-[#05030f] to-[#020204] rounded-3xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.45)]"
+    >
+      <div className="overflow-x-auto">
+        <PresenceBar users={remoteUsers} />
       </div>
 
-      <div className="relative border border-white/10 bg-[#080a20]/60 backdrop-blur-2xl rounded-2xl h-[78vh] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)]">
-        <EditorContent
-          editor={editor}
-          className="h-full p-10 prose prose-invert max-w-none leading-relaxed tracking-wide"
-          style={{
-            fontFamily: "var(--font-stack)",
-            fontSize: "17px",
-            letterSpacing: ".2px",
-          }}
-        />
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-[1fr_360px] lg:grid-cols-[1fr_400px] gap-4 md:gap-6">
+        <div className="flex flex-col gap-4">
+          <div className="rounded-2xl p-2 sm:p-3 bg-[#0b0d25]/40 backdrop-blur-xl border border-white/10">
+            <EditorToolbar editor={editor} />
+          </div>
 
-        {/* USER CURSORS */}
-        {usersWithCursor.map(
-          (u) =>
-            u.cursor && (
-              <div
-                key={u.id}
-                style={{ left: u.cursor.left, top: u.cursor.top }}
-                className="pointer-events-none absolute -translate-x-1/2 -translate-y-full flex flex-col items-center"
-              >
-                <div
-                  style={{ background: u.color }}
-                  className="h-3 w-3 rounded-full border border-white"
-                />
-                <span
-                  className="text-xs bg-[#0d0a19]/80 text-white px-2 mt-1 rounded-lg shadow"
-                  style={{ fontFamily: "var(--font-bitcount)" }}
-                >
-                  {u.name}
-                </span>
-              </div>
-            )
-        )}
+          <div className="relative border border-white/10 bg-[#080a20]/60 backdrop-blur-2xl rounded-2xl h-[58vh] sm:h-[68vh] md:h-[78vh] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)]">
+            <EditorContent
+              editor={editor}
+              className="h-full p-3 sm:p-6 md:p-8 prose prose-invert max-w-none leading-relaxed tracking-wide text-[15px] sm:text-[16px] md:text-[18px]"
+              style={{
+                fontFamily: "var(--font-stack)",
+                letterSpacing: ".2px",
+              }}
+            />
+
+            {usersWithCursor.map(
+              (u) =>
+                u.cursor && (
+                  <div
+                    key={u.id}
+                    style={{ left: u.cursor.left, top: u.cursor.top }}
+                    className="pointer-events-none absolute -translate-x-1/2 -translate-y-full flex flex-col items-center"
+                  >
+                    <div
+                      style={{ background: u.color }}
+                      className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full border border-white"
+                    />
+                    <span
+                      className="hidden sm:inline text-[10px] sm:text-xs bg-[#0d0a19]/80 text-white px-2 mt-1 rounded-lg shadow"
+                      style={{ fontFamily: "var(--font-bitcount)" }}
+                    >
+                      {u.name}
+                    </span>
+                  </div>
+                )
+            )}
+          </div>
+        </div>
+
+        <div className="order-last md:order-none">
+          <AISidebar editor={editor} />
+        </div>
       </div>
     </div>
-
-    {/* RIGHT SIDE AI PANEL */}
-    <div className="mt-6">
-      <AISidebar editor={editor} />
-    </div>
-  </div>
-);
+  );
 }

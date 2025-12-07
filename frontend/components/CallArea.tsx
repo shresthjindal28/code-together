@@ -66,8 +66,8 @@ export function CallArea({
       </div>
 
       {/* Video grid */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-24 pt-4">
-        <div className="grid grid-cols-2 gap-4 w-full max-w-5xl">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 pb-24 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-5xl">
           <VideoTile
             ref={localVideo}
             label="You"
@@ -128,7 +128,7 @@ export function CallArea({
 
       {/* Waiting room */}
       {isHost && pendingRequests.length > 0 && (
-        <div className="absolute right-6 bottom-28 w-72 p-4 rounded-2xl bg-black/80 border border-yellow-500/60 backdrop-blur-md shadow-xl">
+        <div className="absolute bottom-20 sm:bottom-28 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 w-[calc(100%-2rem)] sm:w-72 p-4 rounded-2xl bg-black/80 border border-yellow-500/60 backdrop-blur-md shadow-xl">
           <h3
             className="mb-2 text-sm"
             style={{ fontFamily: "var(--font-stack)" }}

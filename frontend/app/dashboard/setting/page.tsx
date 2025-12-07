@@ -26,7 +26,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen w-[80vw] p-10 bg-gradient-to-br from-[#020316] via-[#05030f] to-[#020204] text-white">
+    <div className="min-h-screen w-full lg:w-[80vw] px-4 sm:px-6 lg:px-10 bg-gradient-to-br from-[#020316] via-[#05030f] to-[#020204] text-white">
       <div className="max-w-3xl mx-auto space-y-12">
 
         <div>
@@ -38,10 +38,8 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        {/* SECTION – PROFILE */}
         <div className="p-8 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl space-y-6">
 
-          {/* Profile Image */}
           <div className="flex items-center gap-4">
             <UserButton appearance={{ elements: { userButtonAvatarBox: "w-20 h-20", } }} />
 
@@ -52,7 +50,6 @@ export default function SettingsPage() {
 
           <Separator />
 
-          {/* User info */}
           <div className="space-y-4">
 
             <div>
@@ -84,7 +81,6 @@ export default function SettingsPage() {
         </div>
 
 
-        {/* SECTION – APPEARANCE */}
         <div className="p-8 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl space-y-6">
           <div>
             <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-stack)" }}>
@@ -104,7 +100,6 @@ export default function SettingsPage() {
         </div>
 
 
-        {/* SECTION – LOGOUT */}
         <div className="p-8 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl space-y-6">
           <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-stack)" }}>
             Account

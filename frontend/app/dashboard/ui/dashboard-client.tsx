@@ -16,7 +16,7 @@ export default function DashboardPageUI({
   }
 }) {
   return (
-    <div className="p-8 min-h-screen text-white w-[82vw] flex justify-center flex-col">
+    <div className="min-h-screen text-white w-full lg:w-[82vw] flex justify-center flex-col px-4 sm:px-8">
 
       <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0b0b0b] border border-white/10">
 

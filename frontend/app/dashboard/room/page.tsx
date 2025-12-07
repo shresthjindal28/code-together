@@ -38,9 +38,9 @@ export default function RoomManager() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen w-[80vw] bg-[#02030e] p-4">
+    <div className="flex justify-center items-center min-h-screen w-full lg:w-[80vw] bg-[#02030e] p-4">
 
-      <Card className="w-[420px] bg-[#090b1a]/60 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_#020614] rounded-2xl transition hover:shadow-[0_0_60px_rgba(50,50,255,0.3)]">
+      <Card className="w-full max-w-md bg-[#090b1a]/60 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_#020614] rounded-2xl transition hover:shadow-[0_0_60px_rgba(50,50,255,0.3)]">
         <CardHeader>
           <CardTitle
             className="text-3xl font-semibold tracking-wide"
@@ -58,7 +58,6 @@ export default function RoomManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* CREATE */}
           <div className="space-y-2">
             <Input
               className="bg-[#0e1128] border-white/20 focus-visible:ring-blue-500"
@@ -78,7 +77,6 @@ export default function RoomManager() {
 
           <Separator className="bg-white/20" />
 
-          {/* JOIN */}
           <div className="space-y-2">
             <Input
               className="bg-[#0e1128] border-white/20 focus-visible:ring-purple-500"

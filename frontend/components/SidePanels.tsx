@@ -23,7 +23,7 @@ export function SidePanels({
   chatEndRef,
 }: Props) {
   return (
-    <div className="w-80 h-full rounded-2xl bg-black/60 border border-white/10 flex flex-col overflow-hidden">
+    <div className="w-full sm:w-80 h-full rounded-2xl bg-black/60 border border-white/10 flex flex-col overflow-hidden">
       <ParticipantsPanel participants={participants} />
       <ChatPanel
         chatMessages={chatMessages}

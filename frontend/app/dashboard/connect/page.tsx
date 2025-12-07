@@ -26,7 +26,7 @@ export default function ConnectPage() {
   }, [])
 
   return (
-    <div className="w-[80vw] p-10 text-white space-y-10">
+    <div className="w-full lg:w-[80vw] px-4 sm:px-6 lg:px-10 text-white space-y-10">
       <h1
         className="text-4xl mb-4"
         style={{ fontFamily: "var(--font-science)" }}
@@ -34,7 +34,6 @@ export default function ConnectPage() {
         Meet-like Calls
       </h1>
 
-      {/* Start meeting */}
       <section className="space-y-3">
         <h2 className="text-xl" style={{ fontFamily: "var(--font-stack)" }}>
           Start a meeting
@@ -47,14 +46,13 @@ export default function ConnectPage() {
         </button>
       </section>
 
-      {/* Join with code */}
       <section className="space-y-3">
         <h2 className="text-xl" style={{ fontFamily: "var(--font-stack)" }}>
           Join with a code
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
-            className="px-4 py-2 rounded bg-neutral-900 border border-white/10 flex-1"
+            className="px-4 py-2 rounded bg-neutral-900 border border-white/10 w-full sm:flex-1"
             placeholder="Enter a code or link"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value)}
@@ -68,7 +66,6 @@ export default function ConnectPage() {
         </div>
       </section>
 
-      {/* Active calls */}
       <section>
         <h2 className="text-xl mb-3" style={{ fontFamily: "var(--font-stack)" }}>
           Active meetings

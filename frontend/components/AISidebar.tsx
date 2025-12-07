@@ -140,7 +140,7 @@ export default function AISidebar({ editor }: { editor: Editor | null }) {
       </button>
 
       {open && (
-        <div className="fixed right-4 top-4 bottom-16 z-50 w-80 rounded-2xl bg-black/90 border border-white/10 p-3 flex flex-col text-sm">
+        <div className="fixed top-4 bottom-16 z-50 w-[calc(100%-2rem)] sm:w-80 left-4 sm:left-auto right-4 rounded-2xl bg-black/90 border border-white/10 p-3 flex flex-col text-sm">
           <div className="text-white font-semibold mb-2">AI Assistant</div>
 
           <div ref={scrollRef} className="flex-1 overflow-auto space-y-2 pr-1">

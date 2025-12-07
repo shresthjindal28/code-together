@@ -1,4 +1,3 @@
-// app/actions/editorSuggest.ts
 "use server";
 
 import OpenAI from "openai";

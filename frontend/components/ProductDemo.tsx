@@ -20,7 +20,7 @@ export default function ProductDemo() {
           </p>
         </div>
 
-        <div className="relative w-full h-[550px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_40px_#7e5eff30] bg-gradient-to-br from-[#111] via-[#151115] to-[#000]">
+        <div className="relative w-full h-[260px] sm:h-[400px] md:h-[550px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_40px_#7e5eff30] bg-gradient-to-br from-[#111] via-[#151115] to-[#000]">
           {/* Glow */}
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#7e5eff33] via-transparent to-[#ff5bff33] blur-2xl"></div>
 

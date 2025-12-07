@@ -102,7 +102,7 @@ export default function EditorToolbar({ editor }: Props) {
       key={id}
       disabled={!!loading}
       onClick={onClick}
-      className={`px-3 py-1 rounded-md text-xs border border-border/60 bg-background/40 hover:bg-accent transition ${
+      className={`flex-shrink-0 px-2.5 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs border border-border/60 bg-background/40 hover:bg-accent transition ${
         loading === id ? "opacity-50" : ""
       }`}
     >
@@ -111,30 +111,34 @@ export default function EditorToolbar({ editor }: Props) {
   )
 
   return (
-    <div className="mb-3 flex items-center gap-2 rounded-xl border border-border/70 bg-[#050509]/80 px-3 py-2 backdrop-blur">
-      <span className="text-[11px] uppercase font-semibold tracking-widest text-muted-foreground">
-        AI Tools
-      </span>
+    <div className="mb-3 rounded-xl border border-border/70 bg-[#050509]/80 px-3 py-2 backdrop-blur">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto sm:overflow-visible whitespace-nowrap">
+          <span className="text-[11px] uppercase font-semibold tracking-widest text-muted-foreground">
+            AI Tools
+          </span>
 
-      <div className="mx-2 h-4 w-px bg-border" />
+          <div className="mx-2 h-4 w-px bg-border" />
 
-      {Btn("tone-neutral","Neutral",()=>handleTone("neutral"))}
-      {Btn("tone-formal","Formal",()=>handleTone("formal"))}
-      {Btn("tone-casual","Casual",()=>handleTone("casual"))}
-      {Btn("tone-friendly","Friendly",()=>handleTone("friendly"))}
-      {Btn("grammar","Grammar Fix",handleGrammar)}
-      {Btn("summary","Summarize",handleSummary)}
-      {Btn("explain","Explain 💡",handleExplain)}
-      {Btn("autocomplete","Auto-complete ✨",handleAutocomplete)}
+          {Btn("tone-neutral","Neutral",()=>handleTone("neutral"))}
+          {Btn("tone-formal","Formal",()=>handleTone("formal"))}
+          {Btn("tone-casual","Casual",()=>handleTone("casual"))}
+          {Btn("tone-friendly","Friendly",()=>handleTone("friendly"))}
+          {Btn("grammar","Grammar Fix",handleGrammar)}
+          {Btn("summary","Summarize",handleSummary)}
+          {Btn("explain","Explain 💡",handleExplain)}
+          {Btn("autocomplete","Auto-complete ✨",handleAutocomplete)}
+        </div>
 
-      <div className="ml-auto">
-        <button
-          onClick={handleExportPdf}
-          disabled={!!loading}
-          className="px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs"
-        >
-          Export PDF
-        </button>
+        <div className="sm:ml-auto flex-shrink-0">
+          <button
+            onClick={handleExportPdf}
+            disabled={!!loading}
+            className="px-2.5 sm:px-3 py-1 rounded-md bg-primary text-primary-foreground text-[11px] sm:text-xs"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
     </div>
   )
