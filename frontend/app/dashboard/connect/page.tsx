@@ -26,7 +26,7 @@ export default function ConnectPage() {
   }, [])
 
   return (
-    <div className="p-10 text-white space-y-10">
+    <div className="w-[80vw] p-10 text-white space-y-10">
       <h1
         className="text-4xl mb-4"
         style={{ fontFamily: "var(--font-science)" }}
