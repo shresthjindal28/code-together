@@ -25,7 +25,7 @@ export function AppSidebar({ user }: {
     { title: "Dashboard", url: "/dashboard", icon: Home },
     { title: "Collab Editor", url: "/dashboard/room", icon: Calendar },
     { title: "Connect", url: "/dashboard/connect", icon: Presentation },
-    { title: "Settings", url: "/settings", icon: Settings },
+    { title: "Settings", url: "/dashboard/setting", icon: Settings },
   ]
 
   return (

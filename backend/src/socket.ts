@@ -29,18 +29,21 @@ type RateState = {
 
 export function setupSocket(server: http.Server, origin: string) {
   const io = new Server(server, {
-    cors: { origin, credentials: true }
+    cors: { origin, credentials: true },
   })
 
   const { pubClient, subClient } = createRedisClients()
   if (pubClient && subClient) io.adapter(createAdapter(pubClient, subClient))
 
   io.on("connection", (socket) => {
+
     const rateState: RateState = { timestamps: [] }
 
-    const checkRateLimit = (action: string): boolean => {
+    const checkRateLimit = (): boolean => {
       const now = Date.now()
-      rateState.timestamps = rateState.timestamps.filter(t => now - t < RATE_WINDOW_MS)
+      rateState.timestamps = rateState.timestamps.filter(
+        (t) => now - t < RATE_WINDOW_MS
+      )
       if (rateState.timestamps.length >= MAX_EVENTS_PER_WINDOW) return false
       rateState.timestamps.push(now)
       return true
@@ -79,11 +82,17 @@ export function setupSocket(server: http.Server, origin: string) {
         ownerId,
       })
 
-      if (roomDocs.has(roomId)) socket.emit("editor-init", { html: roomDocs.get(roomId) })
+      if (roomDocs.has(roomId)) {
+        socket.emit("editor-init", { html: roomDocs.get(roomId) })
+      }
     })
 
-    socket.on("editor-update", (payload: { roomId: string; html: string; userId: string }) => {
-      if (!checkRateLimit("editor-update")) return
+    socket.on("editor-update", (payload: {
+      roomId: string
+      html: string
+      userId: string
+    }) => {
+      if (!checkRateLimit()) return
       const { roomId, html, userId } = payload
       roomDocs.set(roomId, html)
       socket.to(roomId).emit("editor-update", { html, userId })
@@ -92,15 +101,14 @@ export function setupSocket(server: http.Server, origin: string) {
     socket.on("cursor-update", (payload: {
       roomId: string
       userId: string
-      name: string
-      color: string
       selection: CursorSelection | null
       isTyping: boolean
     }) => {
-      if (!checkRateLimit("cursor-update")) return
-      const { roomId, userId, isTyping } = payload
+      if (!checkRateLimit()) return
 
+      const { roomId, userId, isTyping } = payload
       const users = roomUsers.get(roomId)
+
       if (users) {
         for (const [sockId, u] of users.entries()) {
           if (u.id === userId) users.set(sockId, { ...u, isTyping })
@@ -126,20 +134,80 @@ export function setupSocket(server: http.Server, origin: string) {
     })
 
     socket.on("call-offer", (payload: { roomId: string; offer: any }) => {
-      socket.to(payload.roomId).emit("call-offer", { offer: payload.offer, from: socket.id })
+      socket.to(payload.roomId).emit("call-offer", {
+        offer: payload.offer,
+        from: socket.id,
+      })
     })
 
     socket.on("call-answer", (payload: { roomId: string; answer: any }) => {
-      socket.to(payload.roomId).emit("call-answer", { answer: payload.answer, from: socket.id })
+      socket.to(payload.roomId).emit("call-answer", {
+        answer: payload.answer,
+        from: socket.id,
+      })
     })
 
     socket.on("ice-candidate", (payload: { roomId: string; candidate: any }) => {
-      socket.to(payload.roomId).emit("ice-candidate", { candidate: payload.candidate, from: socket.id })
+      socket.to(payload.roomId).emit("ice-candidate", {
+        candidate: payload.candidate,
+        from: socket.id,
+      })
     })
 
     socket.on("end-call", (payload: { roomId: string }) => {
       socket.to(payload.roomId).emit("end-call")
     })
+
+    socket.on("call-join-request", (payload: {
+      roomId: string
+      name: string
+      requesterSocketId: string
+    }) => {
+      socket.to(payload.roomId).emit("call-join-request", payload)
+    })
+
+    socket.on("call-join-response", (payload: {
+      roomId: string
+      requesterSocketId: string
+      approved: boolean
+    }) => {
+      io.to(payload.requesterSocketId).emit("call-join-response", payload)
+    })
+
+    socket.on(
+      "call-chat",
+      (payload: { roomId: string; name: string; text: string }) => {
+        socket.to(payload.roomId).emit("call-chat", payload)
+      }
+    )
+
+    socket.on(
+      "call-media-state",
+      (payload: { roomId: string; userId: string; mic: boolean; cam: boolean }) => {
+        socket.to(payload.roomId).emit("call-media-state", payload)
+      }
+    )
+
+    socket.on(
+      "call-raise-hand",
+      (payload: { roomId: string; userId: string; name: string }) => {
+        socket.to(payload.roomId).emit("call-raise-hand", payload)
+      }
+    )
+
+    socket.on(
+      "call-screen-share",
+      (payload: { roomId: string; userId: string; sharing: boolean }) => {
+        socket.to(payload.roomId).emit("call-screen-share", payload)
+      }
+    )
+
+    socket.on(
+      "call-speaking",
+      (payload: { roomId: string; userId: string }) => {
+        socket.to(payload.roomId).emit("call-speaking", payload)
+      }
+    )
 
     socket.on("disconnect", () => {
       const roomId = (socket.data as any).roomId as string | undefined

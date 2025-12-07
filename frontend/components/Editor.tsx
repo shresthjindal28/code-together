@@ -189,16 +189,28 @@ export default function Editor({ initialHtml, roomId, isOwner }: Props) {
   if (!editor) return null;
 
   return (
-    <div className="w-[77vw]">
-      <PresenceBar users={remoteUsers} />
-      <EditorToolbar editor={editor} />
+  <div
+    className="w-[77vw] min-h-screen py-6 px-6 bg-gradient-to-br from-[#020316] via-[#05030f] to-[#020204] rounded-3xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.45)]"
+  >
+    <PresenceBar users={remoteUsers} />
 
-      <div className="relative border rounded-2xl h-[80vh] w-full">
+    <div className="flex flex-col gap-4">
+      <div className="rounded-2xl p-3 bg-[#0b0d25]/40 backdrop-blur-xl border border-white/10">
+        <EditorToolbar editor={editor} />
+      </div>
+
+      <div className="relative border border-white/10 bg-[#080a20]/60 backdrop-blur-2xl rounded-2xl h-[78vh] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)]">
         <EditorContent
           editor={editor}
-          className="h-full p-8 prose prose-invert max-w-none"
+          className="h-full p-10 prose prose-invert max-w-none leading-relaxed tracking-wide"
+          style={{
+            fontFamily: "var(--font-stack)",
+            fontSize: "17px",
+            letterSpacing: ".2px",
+          }}
         />
 
+        {/* USER CURSORS */}
         {usersWithCursor.map(
           (u) =>
             u.cursor && (
@@ -209,17 +221,24 @@ export default function Editor({ initialHtml, roomId, isOwner }: Props) {
               >
                 <div
                   style={{ background: u.color }}
-                  className="h-3 w-3 rounded-full border"
+                  className="h-3 w-3 rounded-full border border-white"
                 />
-                <span className="text-xs bg-black/80 text-white px-1 mt-1 rounded">
+                <span
+                  className="text-xs bg-[#0d0a19]/80 text-white px-2 mt-1 rounded-lg shadow"
+                  style={{ fontFamily: "var(--font-bitcount)" }}
+                >
                   {u.name}
                 </span>
               </div>
             )
         )}
       </div>
+    </div>
 
+    {/* RIGHT SIDE AI PANEL */}
+    <div className="mt-6">
       <AISidebar editor={editor} />
     </div>
-  );
+  </div>
+);
 }
