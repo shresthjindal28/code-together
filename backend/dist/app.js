@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createApp = createApp;
-// src/app.ts
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
@@ -24,7 +23,7 @@ function createApp() {
         standardHeaders: true,
         legacyHeaders: false,
     }));
-    app.get("/health", (_req, res) => {
+    app.get("/health", (_, res) => {
         res.json({ ok: true });
     });
     return app;
