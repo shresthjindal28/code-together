@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+import type { Request, Response } from "express";
 
 export function createApp() {
   const app = express();
@@ -29,7 +30,7 @@ export function createApp() {
     })
   );
 
-  app.get("/health", (_req, res) => {
+  app.get("/health", (_req: Request, res: Response) => {
     res.json({ ok: true });
   });
 
